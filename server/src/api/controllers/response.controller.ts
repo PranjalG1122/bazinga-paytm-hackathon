@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from "express";
 import { successResponse } from "../../utils/response.js";
 import { ValidationError } from "../../utils/errors.js";
-// Import services when ready:
-// import { translationService } from '../../layers/translation/translation.service.js';
-// import { agentService } from '../../layers/agent/agent.service.js';
-// import { notifySlack } from '../../layers/slack/slack.service.js';
-// import { telegramService } from '../../layers/telegram/telegram.service.js';
+import { translationService } from '../../layers/translation/translation.service.js';
+import { agentService } from '../../layers/agent/agent.service.js';
+import { sendTelegramMessage } from '../../layers/telegram/telegram.service.js';
+import { getTelegramConversationContext } from '../../layers/telegram/telegram-context.service.js';
 
 export interface TelegramIncomingMessageBody {
   chatId: string | number;
@@ -19,8 +18,13 @@ export interface InternalResponseResult {
   message: string;
   chatId: string | number;
   receivedMessage: string;
+  detectedLanguage: string;
+  agentReply: string;
+  localizedReply: string;
   pipeline: string[];
 }
+
+const PROCESSING_MESSAGE = 'Thank you. Your request is being processed.';
 
 /**
  * Core business workflow for merchant incoming messages.
@@ -41,65 +45,59 @@ export async function executeResponseWorkflow(
 
   console.log(`[Response Workflow] Processing incoming message from chatId=${chatId}: "${message.slice(0, 60)}"`);
 
-  /*
-   * -------------------------------------------------------------------------
-   * STEP 1: TRANSLATION LAYER (Detect language & translate incoming -> English)
-   * -------------------------------------------------------------------------
-   * const understood = await translationService.understand(message, language);
-   * const detectedLanguage = understood.language;
-   * const englishMessage = understood.text;
-   */
+  const merchantContext = metadata || getTelegramConversationContext(chatId);
+  const preferredLanguage =
+    language === 'auto' && typeof merchantContext?.preferredLanguage === 'string'
+      ? merchantContext.preferredLanguage
+      : language;
 
-  /*
-   * -------------------------------------------------------------------------
-   * STEP 2: AGENT LAYER (Process query in English)
-   * -------------------------------------------------------------------------
-   * const agentResponse = await agentService.sendMessage({
-   *   message: englishMessage,
-   *   userId: userId ? String(userId) : String(chatId),
-   *   sessionId: String(chatId),
-   *   metadata,
-   * });
-   * const rawAgentReply = agentResponse.reply;
-   */
+  // Translate the merchant's message into the language Hermes operates in.
+  const understood = await translationService.understand(message.trim(), preferredLanguage);
+  const detectedLanguage = understood.language || language;
 
-  /*
-   * -------------------------------------------------------------------------
-   * STEP 3: SLACK LAYER (Notify Slack conditionally based on agent output)
-   * -------------------------------------------------------------------------
-   * const shouldEscalate = agentResponse.action === 'ESCALATE' || metadata?.escalate;
-   * if (shouldEscalate) {
-   *   await notifySlack(`[Alert] Escalation needed for merchant ${chatId}: ${rawAgentReply}`);
-   * }
-   */
+  // Acknowledge immediately before the potentially long-running agent turn.
+  const processingReply = await translationService.localize(PROCESSING_MESSAGE, detectedLanguage);
+  await sendTelegramMessage(chatId, processingReply);
 
-  /*
-   * -------------------------------------------------------------------------
-   * STEP 4: TRANSLATION LAYER (Translate agent reply back to initial language)
-   * -------------------------------------------------------------------------
-   * const localizedReply = await translationService.localize(rawAgentReply, detectedLanguage);
-   */
+  const context = merchantContext
+    ? `\n\nMerchant context (trusted application data):\n${JSON.stringify(merchantContext)}`
+    : '';
+  let agentResponse;
+  let localizedReply: string;
+  try {
+    agentResponse = await agentService.sendMessage({
+      message: `${understood.text}${context}`,
+      userId: userId ? String(userId) : String(chatId),
+      sessionId: `telegram-${String(chatId)}`,
+      metadata: merchantContext,
+    });
 
-  /*
-   * -------------------------------------------------------------------------
-   * STEP 5: TELEGRAM LAYER (Send localized reply to user)
-   * -------------------------------------------------------------------------
-   * await telegramService.sendMessage({
-   *   chatId: String(chatId),
-   *   text: localizedReply,
-   * });
-   */
+    localizedReply = await translationService.localize(agentResponse.reply, detectedLanguage);
+    await sendTelegramMessage(chatId, localizedReply);
+  } catch (error) {
+    const fallback = 'Sorry, we could not complete your request right now. A support agent will follow up.';
+    try {
+      const localizedFallback = await translationService.localize(fallback, detectedLanguage);
+      await sendTelegramMessage(chatId, localizedFallback);
+    } catch (notificationError) {
+      console.error('[Response Workflow] Failed to send failure notification', notificationError);
+    }
+    throw error;
+  }
 
   return {
     message: "Response flow processed successfully.",
     chatId,
     receivedMessage: message,
+    detectedLanguage,
+    agentReply: agentResponse.reply,
+    localizedReply,
     pipeline: [
       "1. Translation Layer (Detect language & translate to English)",
-      "2. Agent Layer (Process query & decide action)",
-      "3. Slack Layer (Conditional notification/escalation)",
+      "2. Telegram Layer (Send localized processing acknowledgement)",
+      "3. Hermes Agent Layer (Process query, choose tools, or escalate)",
       "4. Translation Layer (Translate response back to user language)",
-      "5. Telegram Layer (Send final localized message to Telegram)",
+      "5. Telegram Layer (Send final localized message)",
     ],
   };
 }

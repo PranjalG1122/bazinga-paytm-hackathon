@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { successResponse } from '../../utils/response.js';
 import { sendTelegramMessage } from '../../layers/telegram/telegram.service.js';
 import { getMockDatabaseData, Ticket } from '../../data/data.service.js';
+import { setTelegramConversationContext } from '../../layers/telegram/telegram-context.service.js';
 
 export interface CronRunOptions {
   chatId?: string | number;
@@ -9,6 +10,7 @@ export interface CronRunOptions {
   dormancyThresholdDays?: number;
   batchSize?: number;
   dryRun?: boolean;
+  merchantId?: string;
 }
 
 const DEFAULT_OUTREACH_MESSAGE = 'Hello, how can PayTM help you today?';
@@ -45,19 +47,25 @@ export async function runDormancyCron(
   try {
     const {
       chatId = process.env.TELEGRAM_DEFAULT_CHAT_ID,
-      message = DEFAULT_OUTREACH_MESSAGE,
+      message,
       dormancyThresholdDays = 30,
       batchSize = 100,
       dryRun = false,
+      merchantId,
     } = req.body || {};
 
     // 1. Fetch data from mock database
     const dbData = getMockDatabaseData();
     const allTickets: Ticket[] = dbData.tickets || [];
 
-    // Filter accounts inactive for > 1 month (> dormancyThresholdDays)
+    // Select linked accounts inactive for at least the configured threshold.
     const dormantAccounts = allTickets
-      .filter((ticket) => ticket.days_inactive >= dormancyThresholdDays && ticket.merchant.telegram_linked)
+      .filter(
+        (ticket) =>
+          ticket.days_inactive >= dormancyThresholdDays &&
+          ticket.merchant.telegram_linked &&
+          (!merchantId || ticket.merchant.id === merchantId)
+      )
       .slice(0, batchSize);
 
     // 2. Process accounts and determine notifications
@@ -67,7 +75,7 @@ export async function runDormancyCron(
 
     const processedResults: ProcessedAccountResult[] = dormantAccounts.map((ticket) => {
       const merchant = ticket.merchant;
-      const outreachText = ticket.last_message?.text_en || message;
+      const outreachText = message || ticket.last_message?.text_local || ticket.last_message?.text_en || DEFAULT_OUTREACH_MESSAGE;
 
       return {
         merchantId: merchant.id,
@@ -86,14 +94,26 @@ export async function runDormancyCron(
     });
 
     // 3. Dispatch Telegram notifications
-    if (!dryRun && targetChatId) {
-      // Send outreach notification for the cron trigger
-      await sendTelegramMessage(targetChatId, message);
+    const selectedTicket = dormantAccounts[0];
+    const selectedResult = processedResults[0];
+    if (!dryRun && targetChatId && selectedTicket && selectedResult) {
+      setTelegramConversationContext(targetChatId, {
+        ticketId: selectedTicket.id,
+        merchantId: selectedTicket.merchant.id,
+        merchantName: selectedTicket.merchant.name,
+        business: selectedTicket.merchant.business,
+        city: selectedTicket.merchant.city,
+        preferredLanguage: selectedTicket.merchant.language,
+        daysInactive: selectedTicket.days_inactive,
+        rootCause: selectedTicket.root_cause,
+        summary: selectedTicket.summary,
+        priority: selectedTicket.priority,
+        moneyOwed: selectedTicket.merchant.history?.money_owed ?? 0,
+      });
+      await sendTelegramMessage(targetChatId, selectedResult.outreachMessage);
       telegramSent = true;
       sentCount = 1;
-      if (processedResults.length > 0) {
-        processedResults[0].notified = true;
-      }
+      selectedResult.notified = true;
     }
 
     res.status(200).json(
@@ -108,12 +128,15 @@ export async function runDormancyCron(
         telegramNotification: {
           sent: telegramSent,
           targetChatId: targetChatId ?? null,
-          message: targetChatId ? message : 'Skipped (no chatId provided in request body or TELEGRAM_DEFAULT_CHAT_ID)',
+          message: telegramSent
+            ? selectedResult?.outreachMessage
+            : 'Skipped (no eligible account or no chatId provided)',
         },
         config: {
           dormancyThresholdDays,
           batchSize,
           dryRun,
+          merchantId: merchantId ?? null,
         },
         dormantAccounts: processedResults,
       })

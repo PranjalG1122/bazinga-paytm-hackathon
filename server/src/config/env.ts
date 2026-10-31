@@ -18,6 +18,8 @@ export interface AppConfig {
   agent: {
     apiUrl?: string;
     apiKey?: string;
+    model: string;
+    timeoutMs: number;
   };
   translation: {
     sarvamApiKey?: string;
@@ -43,8 +45,10 @@ export const config: AppConfig = {
     channelId: process.env.SLACK_CHANNEL_ID,
   },
   agent: {
-    apiUrl: process.env.AGENT_API_URL,
-    apiKey: process.env.AGENT_API_KEY,
+    apiUrl: process.env.HERMES_API_URL || process.env.AGENT_API_URL,
+    apiKey: process.env.HERMES_API_KEY || process.env.AGENT_API_KEY,
+    model: process.env.HERMES_MODEL || 'hermes-agent',
+    timeoutMs: parsePort(process.env.HERMES_TIMEOUT_MS, 300_000),
   },
   translation: {
     sarvamApiKey: process.env.SARVAM_API_KEY,

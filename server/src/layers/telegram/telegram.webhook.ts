@@ -32,16 +32,22 @@ export const defaultResponseServiceAdapter: TelegramResponseServiceAdapter = {
     console.log(
       `[Telegram -> Response Workflow] Forwarding incoming update from chatId=${msg.chatId}`
     );
-    await executeResponseWorkflow({
+    // Telegram expects a fast 2xx response, so the slow agent workflow runs
+    // asynchronously after the update has been accepted.
+    void executeResponseWorkflow({
       chatId: msg.chatId,
       message: msg.text,
       userId: msg.userId,
+    }).catch((error) => {
+      console.error(`[Telegram -> Response Workflow] Failed for chatId=${msg.chatId}`, error);
     });
   },
 };
 
 let activeOnboardingAdapter: MerchantTelegramOnboardingAdapter = defaultMerchantOnboardingAdapter;
 let activeResponseAdapter: TelegramResponseServiceAdapter = defaultResponseServiceAdapter;
+const processedUpdateIds = new Set<number>();
+const MAX_REMEMBERED_UPDATES = 1000;
 
 export function setMerchantOnboardingAdapter(adapter: MerchantTelegramOnboardingAdapter): void {
   activeOnboardingAdapter = adapter;
@@ -85,6 +91,19 @@ export async function processTelegramWebhookUpdate(
   }
 
   const telegramUpdate = update as TelegramWebhookUpdate;
+
+  if (typeof telegramUpdate.update_id !== 'number') {
+    throw new ValidationError('Invalid webhook payload: missing numeric update_id.');
+  }
+
+  if (processedUpdateIds.has(telegramUpdate.update_id)) {
+    return { status: 'ignored', reason: 'Duplicate Telegram update ignored' };
+  }
+  processedUpdateIds.add(telegramUpdate.update_id);
+  if (processedUpdateIds.size > MAX_REMEMBERED_UPDATES) {
+    const oldest = processedUpdateIds.values().next().value as number | undefined;
+    if (oldest !== undefined) processedUpdateIds.delete(oldest);
+  }
 
   if (!telegramUpdate.message) {
     return { status: 'ignored', reason: 'Update does not contain a standard message' };

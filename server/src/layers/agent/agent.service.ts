@@ -1,11 +1,11 @@
 import { IAgentProvider, AgentMessageRequest, AgentMessageResponse } from './agent.types.js';
-import { PlaceholderAgentProvider } from './providers/placeholder.provider.js';
+import { HermesAgentProvider } from './providers/hermes.provider.js';
 
 export class AgentService {
   private provider: IAgentProvider;
 
   constructor(provider?: IAgentProvider) {
-    this.provider = provider || new PlaceholderAgentProvider();
+    this.provider = provider || new HermesAgentProvider();
   }
 
   /**

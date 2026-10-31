@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
 import { successResponse, errorResponse } from '../../utils/response.js';
-// Import services for the layers once ready to be activated:
-// import { translationService } from '../../layers/translation/translation.service.js';
-// import { agentService } from '../../layers/agent/agent.service.js';
+import { translationService } from '../../layers/translation/translation.service.js';
+import { agentService } from '../../layers/agent/agent.service.js';
+import { sendTranslationError } from './messages.controller.js';
+// Import once the Telegram step is activated:
 // import { telegramService } from '../../layers/telegram/telegram.service.js';
 
 export interface QueryRequestBody {
@@ -34,62 +35,57 @@ export async function handleQuery(req: Request<unknown, unknown, QueryRequestBod
     return;
   }
 
+  // Step 1: Translation layer (user language -> English).
+  // If `language` is given it is used as the source; otherwise Sarvam detects it.
+  let understood;
+  try {
+    understood = await translationService.understand(userQuestion, language);
+  } catch (err) {
+    sendTranslationError(res, err);
+    return;
+  }
+  // Reply in the language the user actually wrote in (given or detected).
+  const replyLanguage = understood.language;
+
+  // Step 2: Agent layer works in English only.
+  let agentResponse;
+  try {
+    agentResponse = await agentService.sendMessage({
+      message: understood.text,
+      userId,
+      sessionId: chatId !== undefined ? String(chatId) : undefined,
+      metadata,
+    });
+  } catch (err) {
+    console.error('[Query] Agent failed:', (err as Error).message);
+    res.status(502).json(errorResponse((err as Error).message, 'AGENT_ERROR'));
+    return;
+  }
+
+  // Step 3: Translation layer (English -> user language).
+  let localizedAnswer: string;
+  try {
+    localizedAnswer = await translationService.localize(agentResponse.reply, replyLanguage);
+  } catch (err) {
+    sendTranslationError(res, err);
+    return;
+  }
+
   /*
-   * ===========================================================================
-   * LAYER PIPELINE EXECUTION (Commented out until layers are fully ready)
-   * ===========================================================================
-   *
-   * // Step 1: Send user question to Translation Layer
-   * // Translates from the user's source language (e.g., Hindi, Spanish) to English.
-   * const translationToAgent = await translationService.translate({
-   *   text: userQuestion,
-   *   sourceLanguage: language !== 'auto' ? language : undefined,
-   *   targetLanguage: 'en',
-   * });
-   * const agentQuery = translationToAgent.translatedText;
-   *
-   * // Step 2: Send translated question to Agent Layer
-   * // Agent processes the prompt and returns a response.
-   * const agentResponse = await agentService.sendMessage({
-   *   message: agentQuery,
-   *   userId: userId,
-   *   conversationId: chatId ? String(chatId) : undefined,
-   *   metadata,
-   * });
-   * const rawAgentReply = agentResponse.reply;
-   *
-   * // Step 3: Send Agent response to Translation Layer
-   * // Translates the reply back from English to the user's original language.
-   * const targetLang = language && language !== 'auto' ? language : translationToAgent.sourceLanguage;
-   * const translationToUser = await translationService.translate({
-   *   text: rawAgentReply,
-   *   sourceLanguage: 'en',
-   *   targetLanguage: targetLang,
-   * });
-   * const finalLocalizedReply = translationToUser.translatedText;
-   *
-   * // Step 4: Send the localized response to Telegram Layer
+   * Step 4: Telegram layer (not activated yet)
    * if (chatId) {
-   *   await telegramService.sendMessage({
-   *     chatId: String(chatId),
-   *     text: finalLocalizedReply,
-   *   });
+   *   await telegramService.sendMessage({ chatId: String(chatId), text: localizedAnswer });
    * }
-   * ===========================================================================
    */
 
   res.status(200).json(
     successResponse({
-      message: 'Query received successfully. Pipeline layers are configured and will be connected upon completion.',
+      language: replyLanguage,
       query: userQuestion,
-      language,
+      queryEnglish: understood.text,
+      answer: localizedAnswer,
+      answerEnglish: agentResponse.reply,
       chatId: chatId ?? null,
-      pipeline: [
-        '1. Translation Layer (User language -> Agent language)',
-        '2. Agent Layer (Process query & generate response)',
-        '3. Translation Layer (Agent response -> User language)',
-        '4. Telegram Layer (Deliver response to Telegram)',
-      ],
     })
   );
 }

@@ -11,7 +11,7 @@ export class PlaceholderAgentProvider implements IAgentProvider {
   async sendMessage(request: AgentMessageRequest): Promise<AgentMessageResponse> {
     // TODO: Connect to AGENT_API_URL using AGENT_API_KEY when agent backend is ready
     return {
-      reply: `[Agent Placeholder Reply]: Received message "${request.message}"`,
+      reply: `We received your message: "${request.message}". Our team will get back to you shortly.`,
       sessionId: request.sessionId || `session-${Date.now()}`,
       provider: this.name,
       metadata: {

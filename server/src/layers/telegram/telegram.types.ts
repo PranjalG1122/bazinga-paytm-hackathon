@@ -37,6 +37,13 @@ export interface TelegramMessage {
   text?: string;
 }
 
+/** Request body for POST /api/send: we start the conversation with a merchant. */
+export interface TelegramOutboundRequest {
+  chatId: string | number;
+  language: string; // Merchant's preferred language, passed by our system
+  data: string; // English text
+}
+
 export interface TelegramWebhookUpdate {
   update_id: number;
   message?: TelegramMessage;

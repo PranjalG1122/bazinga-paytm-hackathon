@@ -18,7 +18,7 @@ export interface AppConfig {
     apiKey?: string;
   };
   translation: {
-    apiKey?: string;
+    sarvamApiKey?: string;
   };
 }
 
@@ -44,7 +44,7 @@ export const config: AppConfig = {
     apiKey: process.env.AGENT_API_KEY,
   },
   translation: {
-    apiKey: process.env.TRANSLATION_API_KEY,
+    sarvamApiKey: process.env.SARVAM_API_KEY,
   },
 };
 

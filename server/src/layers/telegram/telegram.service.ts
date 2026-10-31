@@ -1,8 +1,18 @@
 import { TelegramClient } from './telegram.client.js';
-import { TelegramMessage, TelegramSendMessageRequest } from './telegram.types.js';
+import {
+  TelegramMessage,
+  TelegramSendMessageRequest,
+  TelegramWebhookUpdate,
+} from './telegram.types.js';
+
+const POLL_TIMEOUT_SECONDS = 30;
+const POLL_RETRY_DELAY_MS = 3000;
+
+export type TelegramMessageHandler = (message: TelegramMessage) => Promise<void>;
 
 export class TelegramService {
   private client: TelegramClient | null = null;
+  private polling = false;
 
   private getClient(): TelegramClient {
     if (!this.client) {
@@ -21,6 +31,45 @@ export class TelegramService {
       text: params.text,
       parse_mode: params.parseMode,
     });
+  }
+
+  /**
+   * Long-polling loop using getUpdates. No public URL or webhook needed.
+   * Runs until stopPolling() is called.
+   */
+  async startPolling(onMessage: TelegramMessageHandler): Promise<void> {
+    const client = this.getClient();
+    if (this.polling) return;
+    this.polling = true;
+    let offset = 0;
+    console.log('[Telegram] Long polling started');
+
+    while (this.polling) {
+      try {
+        const updates = await client.request<TelegramWebhookUpdate[]>('getUpdates', {
+          offset,
+          timeout: POLL_TIMEOUT_SECONDS,
+          allowed_updates: ['message'],
+        });
+
+        for (const update of updates) {
+          offset = update.update_id + 1;
+          if (!update.message) continue;
+          try {
+            await onMessage(update.message);
+          } catch (err) {
+            console.error('[Telegram] Message handler error:', (err as Error).message);
+          }
+        }
+      } catch (err) {
+        console.error('[Telegram] Polling error:', (err as Error).message);
+        await new Promise((resolve) => setTimeout(resolve, POLL_RETRY_DELAY_MS));
+      }
+    }
+  }
+
+  stopPolling(): void {
+    this.polling = false;
   }
 
   /**

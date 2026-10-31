@@ -27,6 +27,12 @@ We built an autonomous end-to-end agentic workflow:
 4. **Human Handoff & Escalation**: Complex edge cases, sensitive money disputes, or human requests are routed to Paytm internal teams on Slack with full context dossiers.
 5. **Ops Control Room**: A Next.js control center displaying live resolution stats, volume at risk vs. recovered, root-cause breakdowns, and merchant ticket audits.
 
+### System Flow & Architecture
+
+![Wapsi System Flow](root.jpeg)
+
+_The workflow loops on incoming replies: translating vernacular messages via Sarvam AI, reasoning and executing tool fixes with Hermes & Qwen, updating the control room, and responding back to the merchant in their native language._
+
 ---
 
 ## Repository Structure
@@ -97,7 +103,7 @@ bazinga-paytm-hackathon/
 3. Configure environment variables in `client/.env` (refer to `client/.env.example`):
 
    ```env
-   NEXT_PUBLIC_API_URL=http://localhost:5000/api
+   NEXT_PUBLIC_SERVER_URL=http://localhost:5000
    ```
 
 4. Start the Next.js development server:

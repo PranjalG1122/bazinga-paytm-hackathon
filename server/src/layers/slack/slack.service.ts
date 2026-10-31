@@ -1,16 +1,10 @@
 import { config, assertEnv } from '../../config/env.js';
-import { SlackClient } from './slack.client.js';
+import { ValidationError } from '../../utils/errors.js';
+import { slackClient, SlackClient } from './slack.client.js';
 import { SlackPostNotificationRequest, SlackApiResponse } from './slack.types.js';
 
 export class SlackService {
-  private client: SlackClient | null = null;
-
-  private getClient(): SlackClient {
-    if (!this.client) {
-      this.client = new SlackClient();
-    }
-    return this.client;
-  }
+  constructor(private readonly client: SlackClient = slackClient) {}
 
   /**
    * Posts a notification message to a configured Slack channel.
@@ -20,13 +14,33 @@ export class SlackService {
     const channel = params.channel || config.slack.channelId;
     const validatedChannel = assertEnv(channel, 'SLACK_CHANNEL_ID');
 
-    const client = this.getClient();
-    return await client.post<SlackApiResponse>('chat.postMessage', {
+    if (!params.text || params.text.trim() === '') {
+      throw new ValidationError('Slack notification message cannot be empty');
+    }
+
+    return await this.client.post<SlackApiResponse>('chat.postMessage', {
       channel: validatedChannel,
       text: params.text,
-      blocks: params.blocks,
     });
   }
 }
 
 export const slackService = new SlackService();
+
+/**
+ * Public notification function: posts message to configured SLACK_CHANNEL_ID.
+ */
+export async function notifySlack(message: string): Promise<void> {
+  if (typeof message !== 'string' || message.trim() === '') {
+    throw new ValidationError('Slack notification message cannot be empty');
+  }
+
+  const channelId = assertEnv(config.slack.channelId, 'SLACK_CHANNEL_ID');
+
+  await slackClient.post<SlackApiResponse>('chat.postMessage', {
+    channel: channelId,
+    text: message,
+  });
+}
+
+

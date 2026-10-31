@@ -1,4 +1,5 @@
 import dotenv from 'dotenv';
+import { ConfigurationError } from '../utils/errors.js';
 
 dotenv.config();
 
@@ -8,6 +9,7 @@ export interface AppConfig {
   telegram: {
     botToken?: string;
     webhookSecret?: string;
+    webhookUrl?: string;
   };
   slack: {
     botToken?: string;
@@ -34,6 +36,7 @@ export const config: AppConfig = {
   telegram: {
     botToken: process.env.TELEGRAM_BOT_TOKEN,
     webhookSecret: process.env.TELEGRAM_WEBHOOK_SECRET,
+    webhookUrl: process.env.TELEGRAM_WEBHOOK_URL,
   },
   slack: {
     botToken: process.env.SLACK_BOT_TOKEN,
@@ -54,7 +57,7 @@ export const config: AppConfig = {
  */
 export function assertEnv(value: string | undefined, name: string): string {
   if (!value || value.trim() === '') {
-    throw new Error(`[Config Error] Missing required configuration: ${name}`);
+    throw new ConfigurationError(`Missing required configuration: ${name}`);
   }
   return value;
 }

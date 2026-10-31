@@ -1,7 +1,6 @@
 export interface SlackPostNotificationRequest {
   channel?: string; // Optional if fallback configured in env
   text: string;
-  blocks?: unknown[];
 }
 
 export interface SlackApiResponse {
@@ -9,4 +8,6 @@ export interface SlackApiResponse {
   channel?: string;
   ts?: string;
   error?: string;
+  warning?: string;
 }
+

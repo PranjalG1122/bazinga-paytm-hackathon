@@ -1,0 +1,494 @@
+{
+  "generated_at": "2026-11-01T05:15:30+00:00",
+  "stats": {
+    "open_tickets": 4,
+    "resolved": 3,
+    "escalated": 2,
+    "no_response": 1,
+    "total": 10,
+    "resolution_rate_pct": 30.0,
+    "avg_minutes_to_resolve": 6.4,
+    "messages_out": 17,
+    "messages_in": 11,
+    "localized_pct": 100.0,
+    "monthly_volume_at_risk": 648137.0,
+    "monthly_volume_recovered": 262626.0
+  },
+  "priority_tiers": {
+    "P1": 2,
+    "P2": 2,
+    "P3": 0
+  },
+  "root_causes": [
+    {
+      "root_cause": "stuck_payout",
+      "count": 4
+    },
+    {
+      "root_cause": "failed_transaction",
+      "count": 2
+    },
+    {
+      "root_cause": "kyc_pending",
+      "count": 1
+    },
+    {
+      "root_cause": "settlement_on_hold",
+      "count": 1
+    },
+    {
+      "root_cause": "lost_interest",
+      "count": 1
+    },
+    {
+      "root_cause": "stuck_transaction",
+      "count": 1
+    }
+  ],
+  "tickets": [
+    {
+      "id": "7d1e0c4a-0006-4000-8000-000000000006",
+      "dormancy_bucket": 45,
+      "state": "IN_CONVERSATION",
+      "root_cause": "kyc_pending",
+      "summary": "₹3,400 payout on hold because PAN is not verified. Guiding the merchant through uploading their PAN card.",
+      "opened_at": "2026-11-01T05:00:00+00:00",
+      "updated_at": "2026-11-01T05:09:40+00:00",
+      "closed_at": null,
+      "days_inactive": 52,
+      "priority": {
+        "score": 61.4,
+        "tier": "P1",
+        "reasons": [
+          "High monthly volume",
+          "Money owed to the merchant",
+          "Stopped suddenly, likely a fixable issue"
+        ]
+      },
+      "merchant": {
+        "id": "M006",
+        "name": "Hetal Shah",
+        "business": "Shah Fabrics",
+        "city": "Surat",
+        "language": "gu-IN",
+        "telegram_linked": true,
+        "history": {
+          "joined_at": "2024-03-18T00:00:00+00:00",
+          "tenure_months": 29,
+          "lifetime_volume": 5257000.0,
+          "lifetime_txn_count": 2193,
+          "avg_monthly_volume": 176167.0,
+          "trend_pct": 4,
+          "money_owed": 3400
+        }
+      },
+      "message_count": 2,
+      "last_message": {
+        "direction": "in",
+        "text_en": "How do I send the PAN card photo?",
+        "text_local": "PAN કાર્ડનો ફોટો કેવી રીતે મોકલું?",
+        "created_at": "2026-11-01T05:09:40+00:00"
+      }
+    },
+    {
+      "id": "7d1e0c4a-0005-4000-8000-000000000005",
+      "dormancy_bucket": 45,
+      "state": "CONTACTED",
+      "root_cause": "failed_transaction",
+      "summary": "₹1,200 payment debited from the customer but never credited to the merchant (bank declined). Offered to credit it; waiting for a reply.",
+      "opened_at": "2026-11-01T05:00:00+00:00",
+      "updated_at": "2026-11-01T05:01:10+00:00",
+      "closed_at": null,
+      "days_inactive": 45,
+      "priority": {
+        "score": 61.2,
+        "tier": "P1",
+        "reasons": [
+          "High monthly volume",
+          "Money owed to the merchant",
+          "Loyal for 3+ years",
+          "Stopped suddenly, likely a fixable issue"
+        ]
+      },
+      "merchant": {
+        "id": "M005",
+        "name": "Ananya Das",
+        "business": "Das Sweets",
+        "city": "Kolkata",
+        "language": "bn-IN",
+        "telegram_linked": true,
+        "history": {
+          "joined_at": "2019-11-05T00:00:00+00:00",
+          "tenure_months": 82,
+          "lifetime_volume": 17228400.0,
+          "lifetime_txn_count": 57428,
+          "avg_monthly_volume": 212800.0,
+          "trend_pct": -3,
+          "money_owed": 1200
+        }
+      },
+      "message_count": 1,
+      "last_message": {
+        "direction": "out",
+        "text_en": "Namaskar Ananya ji, this is Paytm. A payment of ₹1,200 to Das Sweets was debited from your customer but never reached you. We can credit it to your account right now. Shall we go ahead?",
+        "text_local": "নমস্কার অনন্যা জি, Paytm থেকে বলছি। Das Sweets-এর ₹1,200-এর একটি পেমেন্ট আপনার গ্রাহকের অ্যাকাউন্ট থেকে কাটা হয়েছে কিন্তু আপনার কাছে পৌঁছায়নি। আমরা এখনই এটি আপনার অ্যাকাউন্টে জমা করে দিতে পারি। এগিয়ে যাব?",
+        "created_at": "2026-11-01T05:01:10+00:00"
+      }
+    },
+    {
+      "id": "7d1e0c4a-0003-4000-8000-000000000003",
+      "dormancy_bucket": 60,
+      "state": "IN_CONVERSATION",
+      "root_cause": "stuck_payout",
+      "summary": "₹6,180 payout stuck because the IFSC code on the linked bank account doesn't match. Waiting for the merchant to share the correct IFSC.",
+      "opened_at": "2026-11-01T05:00:00+00:00",
+      "updated_at": "2026-11-01T05:07:30+00:00",
+      "closed_at": null,
+      "days_inactive": 62,
+      "priority": {
+        "score": 55.5,
+        "tier": "P2",
+        "reasons": [
+          "Money owed to the merchant",
+          "Loyal for 3+ years",
+          "Stopped suddenly, likely a fixable issue"
+        ]
+      },
+      "merchant": {
+        "id": "M003",
+        "name": "Sunil Patil",
+        "business": "Patil Mobile Repairs",
+        "city": "Pune",
+        "language": "mr-IN",
+        "telegram_linked": true,
+        "history": {
+          "joined_at": "2021-06-02T00:00:00+00:00",
+          "tenure_months": 62,
+          "lifetime_volume": 5459520.0,
+          "lifetime_txn_count": 6080,
+          "avg_monthly_volume": 88587.0,
+          "trend_pct": 4,
+          "money_owed": 6180
+        }
+      },
+      "message_count": 3,
+      "last_message": {
+        "direction": "out",
+        "text_en": "Sunil ji, your bank account's IFSC code doesn't match. Please share the correct IFSC code, and we'll resend ₹6,180 right away.",
+        "text_local": "सुनील जी, तुमच्या बँक खात्याचा IFSC कोड जुळत नाही. कृपया योग्य IFSC कोड पाठवा, आम्ही ₹6,180 लगेच पुन्हा पाठवू.",
+        "created_at": "2026-11-01T05:07:30+00:00"
+      }
+    },
+    {
+      "id": "7d1e0c4a-0008-4000-8000-000000000008",
+      "dormancy_bucket": 30,
+      "state": "IN_CONVERSATION",
+      "root_cause": "lost_interest",
+      "summary": "No failed payments or stuck payouts. Merchant moved to a competitor over QR fees. Preparing a win-back offer.",
+      "opened_at": "2026-11-01T05:00:00+00:00",
+      "updated_at": "2026-11-01T05:08:20+00:00",
+      "closed_at": null,
+      "days_inactive": 38,
+      "priority": {
+        "score": 54.1,
+        "tier": "P2",
+        "reasons": [
+          "High monthly volume",
+          "Early in dormancy, easiest to win back",
+          "Loyal for 3+ years",
+          "Usage was already declining"
+        ]
+      },
+      "merchant": {
+        "id": "M008",
+        "name": "Rohan D'Souza",
+        "business": "Bean There Café",
+        "city": "Bengaluru",
+        "language": "en-IN",
+        "telegram_linked": true,
+        "history": {
+          "joined_at": "2022-09-01T00:00:00+00:00",
+          "tenure_months": 48,
+          "lifetime_volume": 10692700.0,
+          "lifetime_txn_count": 30554,
+          "avg_monthly_volume": 170583.0,
+          "trend_pct": -43,
+          "money_owed": 0
+        }
+      },
+      "message_count": 2,
+      "last_message": {
+        "direction": "in",
+        "text_en": "Honestly I moved to another app because their QR has lower fees.",
+        "text_local": "Honestly I moved to another app because their QR has lower fees.",
+        "created_at": "2026-11-01T05:08:20+00:00"
+      }
+    },
+    {
+      "id": "7d1e0c4a-0007-4000-8000-000000000007",
+      "dormancy_bucket": 60,
+      "state": "ESCALATED",
+      "root_cause": "settlement_on_hold",
+      "summary": "Vikram Singh (Singh Electronics, Jaipur), inactive 66 days. ₹85,000 settlement on hold for risk review (unusual transaction volume). Above the ₹10,000 auto-action limit, so not touched. Merchant is frustrated after waiting over two months. Needs the settlements team to review and release or explain. Prefers Hindi.",
+      "opened_at": "2026-11-01T05:00:00+00:00",
+      "updated_at": "2026-11-01T05:05:30+00:00",
+      "closed_at": "2026-11-01T05:05:30+00:00",
+      "days_inactive": 66,
+      "priority": {
+        "score": 85.4,
+        "tier": "P1",
+        "reasons": [
+          "High monthly volume",
+          "Large amount owed to the merchant",
+          "Loyal for 3+ years",
+          "Stopped suddenly, likely a fixable issue"
+        ]
+      },
+      "merchant": {
+        "id": "M007",
+        "name": "Vikram Singh",
+        "business": "Singh Electronics",
+        "city": "Jaipur",
+        "language": "hi-IN",
+        "telegram_linked": true,
+        "history": {
+          "joined_at": "2020-01-22T00:00:00+00:00",
+          "tenure_months": 79,
+          "lifetime_volume": 50572800.0,
+          "lifetime_txn_count": 8424,
+          "avg_monthly_volume": 648533.0,
+          "trend_pct": -3,
+          "money_owed": 85000
+        }
+      },
+      "message_count": 3,
+      "last_message": {
+        "direction": "out",
+        "text_en": "I understand, Vikram ji. I have marked your case as urgent and shared all the details with our settlements team, so you won't have to explain again. You will get a call within 2 hours.",
+        "text_local": "मैं समझता हूँ, विक्रम जी। मैंने आपका केस urgent mark कर दिया है और सारी जानकारी हमारी settlements team को भेज दी है, आपको दोबारा कुछ बताना नहीं पड़ेगा। 2 घंटे के अंदर आपको call आएगा।",
+        "created_at": "2026-11-01T05:05:30+00:00"
+      }
+    },
+    {
+      "id": "7d1e0c4a-0001-4000-8000-000000000001",
+      "dormancy_bucket": 30,
+      "state": "RESOLVED",
+      "root_cause": "stuck_payout",
+      "summary": "₹4,200 payout stuck (bank timeout). Re-initiated and settled (UTR4471982351); merchant confirmed.",
+      "opened_at": "2026-11-01T05:00:00+00:00",
+      "updated_at": "2026-11-01T05:04:15+00:00",
+      "closed_at": "2026-11-01T05:04:15+00:00",
+      "days_inactive": 34,
+      "priority": {
+        "score": 58.9,
+        "tier": "P2",
+        "reasons": [
+          "Early in dormancy, easiest to win back",
+          "Loyal for 3+ years",
+          "Stopped suddenly, likely a fixable issue"
+        ]
+      },
+      "merchant": {
+        "id": "M001",
+        "name": "Ramesh Kumar",
+        "business": "Ramesh Kirana Store",
+        "city": "Lucknow",
+        "language": "hi-IN",
+        "telegram_linked": true,
+        "history": {
+          "joined_at": "2020-08-14T00:00:00+00:00",
+          "tenure_months": 73,
+          "lifetime_volume": 10590800.0,
+          "lifetime_txn_count": 42363,
+          "avg_monthly_volume": 146933.0,
+          "trend_pct": -3,
+          "money_owed": 0
+        }
+      },
+      "message_count": 4,
+      "last_message": {
+        "direction": "in",
+        "text_en": "Got it, thank you 🙏",
+        "text_local": "mil gaya, thank you 🙏",
+        "created_at": "2026-11-01T05:04:05+00:00"
+      }
+    },
+    {
+      "id": "7d1e0c4a-0009-4000-8000-000000000009",
+      "dormancy_bucket": 30,
+      "state": "ESCALATED",
+      "root_cause": "stuck_transaction",
+      "summary": "₹300 transaction pending confirmation from the acquiring bank. Merchant asked to speak to a person, so handed over to support.",
+      "opened_at": "2026-11-01T05:00:00+00:00",
+      "updated_at": "2026-11-01T05:03:50+00:00",
+      "closed_at": "2026-11-01T05:03:50+00:00",
+      "days_inactive": 41,
+      "priority": {
+        "score": 58.6,
+        "tier": "P2",
+        "reasons": [
+          "Money owed to the merchant",
+          "Early in dormancy, easiest to win back",
+          "Loyal for 3+ years",
+          "Stopped suddenly, likely a fixable issue"
+        ]
+      },
+      "merchant": {
+        "id": "M009",
+        "name": "Srinivas Reddy",
+        "business": "Reddy Medicals",
+        "city": "Hyderabad",
+        "language": "te-IN",
+        "telegram_linked": true,
+        "history": {
+          "joined_at": "2021-12-12T00:00:00+00:00",
+          "tenure_months": 57,
+          "lifetime_volume": 6842400.0,
+          "lifetime_txn_count": 18007,
+          "avg_monthly_volume": 119200.0,
+          "trend_pct": 4,
+          "money_owed": 300
+        }
+      },
+      "message_count": 2,
+      "last_message": {
+        "direction": "in",
+        "text_en": "I want to talk to a person.",
+        "text_local": "నాకు మనిషితో మాట్లాడాలి",
+        "created_at": "2026-11-01T05:03:40+00:00"
+      }
+    },
+    {
+      "id": "7d1e0c4a-0010-4000-8000-000000000010",
+      "dormancy_bucket": 30,
+      "state": "NO_RESPONSE",
+      "root_cause": "stuck_payout",
+      "summary": "₹1,500 payout stuck (bank timeout). Sent first message and 2 follow-ups; no reply. Payout left untouched until the merchant confirms.",
+      "opened_at": "2026-11-01T05:00:00+00:00",
+      "updated_at": "2026-11-01T05:15:00+00:00",
+      "closed_at": "2026-11-01T05:15:00+00:00",
+      "days_inactive": 33,
+      "priority": {
+        "score": 53.5,
+        "tier": "P2",
+        "reasons": [
+          "Money owed to the merchant",
+          "Early in dormancy, easiest to win back",
+          "Loyal for 3+ years",
+          "Stopped suddenly, likely a fixable issue"
+        ]
+      },
+      "merchant": {
+        "id": "M010",
+        "name": "Kavya Gowda",
+        "business": "Gowda Flowers",
+        "city": "Mysuru",
+        "language": "kn-IN",
+        "telegram_linked": true,
+        "history": {
+          "joined_at": "2023-07-07T00:00:00+00:00",
+          "tenure_months": 38,
+          "lifetime_volume": 1444000.0,
+          "lifetime_txn_count": 9621,
+          "avg_monthly_volume": 37747.0,
+          "trend_pct": 4,
+          "money_owed": 1500
+        }
+      },
+      "message_count": 3,
+      "last_message": {
+        "direction": "out",
+        "text_en": "Kavya ji, just checking in: your ₹1,500 payout is still waiting. Reply YES and we'll send it right away.",
+        "text_local": "ಕಾವ್ಯ ಅವರೇ, ನಿಮ್ಮ ₹1,500 payout ಇನ್ನೂ ಬಾಕಿ ಇದೆ. YES ಎಂದು ಉತ್ತರಿಸಿ, ನಾವು ತಕ್ಷಣ ಕಳುಹಿಸುತ್ತೇವೆ.",
+        "created_at": "2026-11-01T05:10:00+00:00"
+      }
+    },
+    {
+      "id": "7d1e0c4a-0004-4000-8000-000000000004",
+      "dormancy_bucket": 30,
+      "state": "RESOLVED",
+      "root_cause": "failed_transaction",
+      "summary": "₹850 payment debited from the customer but never credited to the merchant (NPCI timeout). Credited to the merchant; merchant confirmed.",
+      "opened_at": "2026-11-01T05:00:00+00:00",
+      "updated_at": "2026-11-01T05:08:55+00:00",
+      "closed_at": "2026-11-01T05:08:55+00:00",
+      "days_inactive": 31,
+      "priority": {
+        "score": 51.0,
+        "tier": "P2",
+        "reasons": [
+          "Early in dormancy, easiest to win back",
+          "Loyal for 3+ years",
+          "Stopped suddenly, likely a fixable issue"
+        ]
+      },
+      "merchant": {
+        "id": "M004",
+        "name": "Arjun Mehta",
+        "business": "Mehta Chai Point",
+        "city": "Delhi",
+        "language": "hi-IN",
+        "telegram_linked": true,
+        "history": {
+          "joined_at": "2023-02-20T00:00:00+00:00",
+          "tenure_months": 43,
+          "lifetime_volume": 2374920.0,
+          "lifetime_txn_count": 59373,
+          "avg_monthly_volume": 53280.0,
+          "trend_pct": -3,
+          "money_owed": 0
+        }
+      },
+      "message_count": 4,
+      "last_message": {
+        "direction": "in",
+        "text_en": "Oh nice, the money came. Thanks, mate.",
+        "text_local": "Arre wah, paise aa gaye. Thanks yaar",
+        "created_at": "2026-11-01T05:08:40+00:00"
+      }
+    },
+    {
+      "id": "7d1e0c4a-0002-4000-8000-000000000002",
+      "dormancy_bucket": 45,
+      "state": "RESOLVED",
+      "root_cause": "stuck_payout",
+      "summary": "₹2,750 payout stuck (bank timeout). Re-initiated and settled; merchant confirmed.",
+      "opened_at": "2026-11-01T05:00:00+00:00",
+      "updated_at": "2026-11-01T05:06:00+00:00",
+      "closed_at": "2026-11-01T05:06:00+00:00",
+      "days_inactive": 47,
+      "priority": {
+        "score": 47.2,
+        "tier": "P3",
+        "reasons": [
+          "Loyal for 3+ years",
+          "Stopped suddenly, likely a fixable issue"
+        ]
+      },
+      "merchant": {
+        "id": "M002",
+        "name": "Lakshmi Narayanan",
+        "business": "Lakshmi Tiffin Centre",
+        "city": "Chennai",
+        "language": "ta-IN",
+        "telegram_linked": true,
+        "history": {
+          "joined_at": "2022-01-10T00:00:00+00:00",
+          "tenure_months": 56,
+          "lifetime_volume": 3473240.0,
+          "lifetime_txn_count": 28940,
+          "avg_monthly_volume": 62413.0,
+          "trend_pct": 4,
+          "money_owed": 0
+        }
+      },
+      "message_count": 4,
+      "last_message": {
+        "direction": "in",
+        "text_en": "Thank you so much!",
+        "text_local": "ரொம்ப நன்றி!",
+        "created_at": "2026-11-01T05:05:50+00:00"
+      }
+    }
+  ]
+}
